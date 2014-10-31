@@ -34,12 +34,9 @@ PUBLIC_DEVICE=${INTERNAL_DEV}
 PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
 
 start() {
-
-	echo "Start?"
 	[ ! -f $ETCDBIN ] && { echo "etcd is not installed in $ETCDBIN."; exit 0; }
-	echo "mkdir"
 	mkdir -p $ETCDPATH/machines/
-	echo "$ETCDBIN -peer-bind-addr ${PUBLIC_IP}:${ETCD_PEER_PORT} -peer-addr ${PUBLIC_IP}:${ETCD_PEER_PORT} -bind-addr ${BIND_IP}:${ETCD_PORT} -addr ${BIND_IP}:${ETCD_PORT} $PEERS -data-dir $ETCDPATH/machines -name $MACHINE $OPTS >> $ETCD_LOG 2>&1 &" 
+	$ETCDBIN -peer-bind-addr ${PUBLIC_IP}:${ETCD_PEER_PORT} -peer-addr ${PUBLIC_IP}:${ETCD_PEER_PORT} -bind-addr ${BIND_IP}:${ETCD_PORT} -addr ${BIND_IP}:${ETCD_PORT} $PEERS -data-dir $ETCDPATH/machines -name $MACHINE $OPTS >> $ETCD_LOG 2>&1 & 
 	echo $! > $PIDFILE  
 }
 stop() {
