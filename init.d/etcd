@@ -24,14 +24,16 @@ ETCD_PEER_PORT="7001"
 ETCD_PORT="4001"
 ETCD_LOG="/dev/null"
 
-test -f $CONFFILE && . $CONFFILE
-
 GTCONF="/etc/getinconf-client.conf"
+
 test -f $GTCONF && . $GTCONF || exit 0
 
-[ -z "$ETCD_CONNECT" ] &&  PEERS="" || PEERS="-peers $ETCD_CONNECT"
 PUBLIC_DEVICE=${INTERNAL_DEV}
 PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
+
+test -f $CONFFILE && . $CONFFILE
+
+[ -z "$ETCD_CONNECT" ] &&  PEERS="" || PEERS="-peers $ETCD_CONNECT"
 
 start() {
 	[ ! -f $ETCDBIN ] && { echo "etcd is not installed in $ETCDBIN."; exit 0; }
