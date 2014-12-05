@@ -1,7 +1,7 @@
 #!/bin/sh
 
 GH_USER=agustim
-GH_REPO=package-etcd
+GH_REPO=package-serf
 
 curl "https://codeload.github.com/${GH_USER}/${GH_REPO}/zip/master" > ${GH_REPO}.zip
 unzip ${GH_REPO}.zip 
