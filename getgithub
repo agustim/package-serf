@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GH_USER=agustim
+GH_USER=Clommunity
 GH_REPO=package-serf
 
 curl "https://codeload.github.com/${GH_USER}/${GH_REPO}/zip/master" > ${GH_REPO}.zip
