@@ -1,5 +1,5 @@
 INSTALLDIR = $(DESTDIR)
-ARCH ?= $(shell uname -m|sed 's/i.86/i386/')
+ARCH ?= $(shell uname -m|sed 's/i.86/i386/'|sed 's/^arm.*/arm/')
 
 all:
 	@echo "all"
