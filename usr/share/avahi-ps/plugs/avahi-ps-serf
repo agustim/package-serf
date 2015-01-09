@@ -145,22 +145,38 @@ serf_rem_service(){
 	[ ! -z "$(getOneService $1 $2)" ] && remMyService "$Service" "$Port"
 }
 
+serf_add_nodeid() {
+	local node_id
+	local information
+
+	node_id="$1"
+	information="$2"
+
+	echo '{"node_id":'$node_id','${information:1}
+
+}
 
 # Find 
 serf_find_(){
 	local defServices
 
 	defServices=""
-	myServices=$($SERFBIN members -status=$SERFSTATUS -format json|jq -c -M ".members[].tags.${SERFTAG}"|sed 's/^"\(.*\)"$/\1/'|grep -v "^null$"|descomprimir|sed "s/'/"'"'"/g"|jq -c -M .[])
+	listServices="$($SERFBIN members -status=$SERFSTATUS -format json|jq -c -M '.members[]')"
 
-	for i in $myServices
+	for node in $listServices
 	do
-		if [ ! -z "$defServices" ]
-		then 
-			defServices=$i","$defServices
-		else
-			defServices=$i
-		fi
+		node_id=$(echo "$node"|jq -c -M ".name")
+		myServices=$(echo "$node"|jq -c -M ".tags.${SERFTAG}"|sed 's/^"\(.*\)"$/\1/'|grep -v "^null$"|descomprimir|sed "s/'/"'"'"/g"|jq -c -M .[])
+		for i in $myServices
+		do
+			iservice="$(serf_add_nodeid "$node_id" "$i")"
+			if [ ! -z "$defServices" ]
+			then 
+				defServices=$iservice","$defServices
+			else
+				defServices=$iservice
+			fi
+		done
 	done
 	echo "[$defServices]"
 }
