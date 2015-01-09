@@ -14,4 +14,5 @@ install:
 	install -m 0755 init.d/serf $(INSTALLDIR)/etc/init.d/
 	install -m 0755 bin/$(ARCH)/serf $(INSTALLDIR)/opt/serf/
 	install -m 0755 usr/share/avahi-ps/plugs/avahi-ps-serf $(INSTALLDIR)/usr/share/avahi-ps/plugs/
+	update-rc.d serf defaults
 	
