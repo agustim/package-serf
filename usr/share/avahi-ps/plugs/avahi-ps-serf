@@ -29,7 +29,7 @@ addMyService() {
 	myServices="$(getAllButOneServices $2 $3)"
 	defServices=""
 	for i in $myServices
-	do 
+	do
 		defServices=$i","$defServices
 	done
 	defServices=$defServices$1
@@ -42,7 +42,7 @@ remMyService() {
 	for i in $myServices
 	do
 		if [ ! -z "$defServices" ]
-		then 
+		then
 			defServices=$i","$defServices
 		else
 			defServices=$i
@@ -90,7 +90,7 @@ setToMyServices(){
 	_TXT=$7
 
   # En comptes de borrar el que hi hagi per el que entri potser primer mirar si el que volem posar és exactament igual a un existent.....
-	
+
 	myService=$(existService "$_Type" "$_Desc" "$_MCloud" "$_Ip" "$_Port" "$_Device" "$_TXT")
 
 	[ -z "$myService" ] && {
@@ -106,7 +106,7 @@ getOneService() {
 	_Type=$1
 	_Port=$2
 
-	getMyServices | grep '"s":"'$_Type'"'.*'"p":"'$_Port'"' 
+	getMyServices | grep '"s":"'$_Type'"'.*'"p":"'$_Port'"'
 }
 
 getAllButOneServices() {
@@ -116,7 +116,7 @@ getAllButOneServices() {
 	_Type=$1
 	_Port=$2
 
-	getMyServices | grep -v '"s":"'$_Type'"'.*'"p":"'$_Port'"' 
+	getMyServices | grep -v '"s":"'$_Type'"'.*'"p":"'$_Port'"'
 }
 
 serf_add_service(){
@@ -156,7 +156,7 @@ serf_add_nodeid() {
 
 }
 
-# Find 
+# Find
 serf_find_(){
 	local defServices
 
@@ -166,17 +166,20 @@ serf_find_(){
 	for node in $listServices
 	do
 		node_id=$(echo "$node"|jq -c -M ".name")
-		myServices=$(echo "$node"|jq -c -M ".tags.${SERFTAG}"|sed 's/^"\(.*\)"$/\1/'|grep -v "^null$"|descomprimir|sed "s/'/"'"'"/g"|jq -c -M .[])
-		for i in $myServices
-		do
-			iservice="$(serf_add_nodeid "$node_id" "$i")"
-			if [ ! -z "$defServices" ]
-			then 
-				defServices=$iservice","$defServices
-			else
-				defServices=$iservice
-			fi
-		done
+		mytags=$(echo "$node"|jq -c -M ".tags.${SERFTAG}"|sed 's/^"\(.*\)"$/\1/'|grep -v "^null$")
+		[ ! -z "$mytags" ] && {
+			myServices=$(echo "$mytags"|descomprimir|sed "s/'/"'"'"/g"|jq -c -M .[])
+			for i in $myServices
+			do
+				iservice="$(serf_add_nodeid "$node_id" "$i")"
+				if [ ! -z "$defServices" ]
+				then
+					defServices=$iservice","$defServices
+				else
+					defServices=$iservice
+				fi
+			done
+		}
 	done
 	echo "[$defServices]"
 }
@@ -210,7 +213,7 @@ serf_unpublish_service(){
 	fi
 	_TYPE="$1"
 	_PORT=$2
-	serf_rem_service $_TYPE $_PORT 
+	serf_rem_service $_TYPE $_PORT
 }
 
 serf_search_service(){
@@ -219,7 +222,7 @@ serf_search_service(){
 	local _SERVICE
 	local _HOST
 	if [ -z "$1" -o "$1" == "." ]
-	then 
+	then
 		_SERVICE=".*"
 	fi
 	if [ -z "$2" -o "$2" == "." ]
