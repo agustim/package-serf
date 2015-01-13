@@ -45,7 +45,6 @@ calculate_name() {
 
 start() {
 	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."; exit 0; }
-	mkdir -p $SERFPATH/machines/
 	$SERFBIN agent -node=$(calculate_name $SERF_BIND) -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} $PEERS $OPTS >> $SERF_LOG 2>&1 & 
 	echo $! > $PIDFILE  
 }
