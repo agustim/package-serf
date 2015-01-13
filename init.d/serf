@@ -23,7 +23,7 @@ MACHINE=$(uname -n)
 OPTS=""
 SERF_RPC_ADDR="127.0.0.1:4001"
 SERF_BIND="5000"
-SERF_LOG="/dev/null"
+SERF_LOG="/tmp/serf.log"
 
 GTCONF="/etc/getinconf-client.conf"
 
@@ -44,9 +44,9 @@ calculate_name() {
 }
 
 start() {
-	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."; exit 0; }
-	$(echo "${PUBLIC_IP}"| grep -qvE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' ) && { echo "Try use SERF with non-IPv4."| tee $SERF_LOG ; echo 1; }
-	$(echo "${PUBLIC_IP}"| grep -qE '^127\.') && { echo "Try use SERF in localhost IPs"| tee $SERF_LOG ; echo 2; }
+	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."| tee -a $SERF_LOG ; exit 0; }
+	$(echo "${PUBLIC_IP}"| grep -qvE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' ) && { echo "Try use SERF with non-IPv4."| tee -a $SERF_LOG ; echo 1; }
+	$(echo "${PUBLIC_IP}"| grep -qE '^127\.') && { echo "Try use SERF in localhost IPs"| tee -a $SERF_LOG ; echo 2; }
 	$SERFBIN agent -node=$(calculate_name $SERF_BIND) -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} $PEERS $OPTS >> $SERF_LOG 2>&1 & 
 	echo $! > $PIDFILE  
 }
