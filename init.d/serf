@@ -30,7 +30,7 @@ GTCONF="/etc/getinconf-client.conf"
 test -f $GTCONF && . $GTCONF || exit 0
 
 PUBLIC_DEVICE=${INTERNAL_DEV}
-PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
+PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global.* $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
 
 test -f $CONFFILE && . $CONFFILE
 
