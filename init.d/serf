@@ -2,8 +2,8 @@
 #
 ### BEGIN INIT INFO
 # Provides:          serf
-# Required-Start:    $local_fs $remote_fs $network $syslog $named 
-# Required-Stop:     $local_fs $remote_fs $network $syslog $named 
+# Required-Start:    $local_fs $remote_fs $network $syslog $named
+# Required-Stop:     $local_fs $remote_fs $network $syslog $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # X-Interactive:     true
@@ -24,6 +24,7 @@ OPTS=""
 SERF_RPC_ADDR="127.0.0.1:4001"
 SERF_BIND="5000"
 SERF_LOG="/dev/null"
+AGENTPROFILE="wan"
 
 GTCONF="/etc/getinconf-client.conf"
 
@@ -48,9 +49,9 @@ start() {
 	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."| tee -a $SERF_LOG ; exit 0; }
 	$(echo "${PUBLIC_IP}"| grep -qvE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' ) && { echo "Try use SERF with non-IPv4."| tee -a $SERF_LOG ; exit 1; }
 	$(echo "${PUBLIC_IP}"| grep -qE '^127\.') && { echo "Try use SERF in localhost IPs"| tee -a $SERF_LOG ; exit 2; }
-  [ ! -z "${ADVERTISE_IP}" ] && { OPTS="${OPTS} -advertise=${ADVERTISE_IP}:${SERF_BIND}" ; } 
-	$SERFBIN agent -node=$(calculate_name $SERF_BIND) -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} $PEERS $OPTS >> $SERF_LOG 2>&1 & 
-	echo $! > $PIDFILE  
+  [ ! -z "${ADVERTISE_IP}" ] && { OPTS="${OPTS} -advertise=${ADVERTISE_IP}:${SERF_BIND}" ; }
+	$SERFBIN agent -node=$(calculate_name $SERF_BIND) -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} -profile=${PROFILE} $PEERS $OPTS >> $SERF_LOG 2>&1 &
+	echo $! > $PIDFILE
 }
 stop() {
   kill -9 $(cat $PIDFILE)
@@ -79,5 +80,3 @@ case "$1" in
 esac
 
 exit 0
-
-
