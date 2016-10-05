@@ -1,12 +1,25 @@
 #!/bin/sh
 
-GH_USER=agustim
+GH_USER=Clommunity
 GH_REPO=package-serf
+NAME=serf
 
 curl "https://codeload.github.com/${GH_USER}/${GH_REPO}/zip/master" > ${GH_REPO}.zip
 unzip ${GH_REPO}.zip 
 cd ${GH_REPO}-master/
-make install
+
+PID=$(pidof serf) && {
+	/etc/init.d/serf stop
+	PID=$(pidof serf) && { kill -9 $PID; }
+	make install
+	/etc/init.d/serf start
+} || {
+	make install
+}
 cd ..
 rm -rf ${GH_REPO}-master ${GH_REPO}.zip 
+update-rc.d serf defaults
 
+# Update info
+mkdir -p /etc/cloudy
+curl -s https://api.github.com/repos/$GH_USER/$GH_REPO/git/refs/heads/master | grep 'sha'|awk -F':' '{print $2}'|awk -F'"' '{print $2}' > /etc/cloudy/${GH_USER}-${GH_REPO}.sha

@@ -15,6 +15,8 @@ SERFPATH="/opt/serf"
 SERFBIN="$SERFPATH/$NAME"
 CONFFILE="/etc/avahi-ps-serf.conf"
 PIDFILE="/var/run/serf.pid"
+IDNUM=50
+HOST_ID=${SERFPATH}/HostID
 
 BIND_IP="0.0.0.0"
 MACHINE=$(uname -n)
@@ -28,16 +30,26 @@ GTCONF="/etc/getinconf-client.conf"
 test -f $GTCONF && . $GTCONF || exit 0
 
 PUBLIC_DEVICE=${INTERNAL_DEV}
-PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
+PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global.* $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
 
 test -f $CONFFILE && . $CONFFILE
 
 [ -z "$SERF_JOIN" ] &&  PEERS="" || PEERS="-join $SERF_JOIN"
 
+
+calculate_name() {
+   PORT=${1:-""}
+	[ ! -f $HOST_ID ] && cat /dev/urandom | env LC_CTYPE=C tr -cd 'a-f0-9' | head -c $IDNUM |md5sum|cut -d " " -f 1 > $HOST_ID
+   echo -n $(cat $HOST_ID)"-${PORT}"
+}
+
 start() {
-	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."; exit 0; }
-	mkdir -p $SERFPATH/machines/
-	$SERFBIN agent -node=$MACHINE -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} $PEERS $OPTS >> $SERF_LOG 2>&1 & 
+	[ -f $PIDFILE ] && $(netstat -ant|grep ${SERF_RPC_ADDR}|grep -q LISTEN) && exit 3;
+	[ ! -f $SERFBIN ] && { echo "serf is not installed in $SERFBIN."| tee -a $SERF_LOG ; exit 0; }
+	$(echo "${PUBLIC_IP}"| grep -qvE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' ) && { echo "Try use SERF with non-IPv4."| tee -a $SERF_LOG ; exit 1; }
+	$(echo "${PUBLIC_IP}"| grep -qE '^127\.') && { echo "Try use SERF in localhost IPs"| tee -a $SERF_LOG ; exit 2; }
+  [ ! -z "${ADVERTISE_IP}" ] && { OPTS="${OPTS} -advertise=${ADVERTISE_IP}:${SERF_BIND}" ; } 
+	$SERFBIN agent -node=$(calculate_name $SERF_BIND) -bind=${PUBLIC_IP}:${SERF_BIND} -rpc-addr=${SERF_RPC_ADDR} $PEERS $OPTS >> $SERF_LOG 2>&1 & 
 	echo $! > $PIDFILE  
 }
 stop() {
