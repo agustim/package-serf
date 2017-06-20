@@ -26,17 +26,14 @@ SERF_BIND="5000"
 SERF_LOG="/dev/null"
 AGENTPROFILE="wan"
 
-GTCONF="/etc/getinconf-client.conf"
+test -f $CONFFILE && . $CONFFILE || { echo "Error: configuration file $CONFFILE not found. Exiting..."| tee -a $SERF_LOG && exit 1; }
 
-test -f $GTCONF && . $GTCONF || exit 0
+PUBLIC_DEVICE=${SERF_INTERFACE}
+PUBLIC_DEVICE=${SERF_INTERFACE:-'eth0'} 
 
-PUBLIC_DEVICE=${INTERNAL_DEV}
 PUBLIC_IP=$(ip addr show dev $PUBLIC_DEVICE|grep "global.* $PUBLIC_DEVICE\$"|awk '{print $2}'|awk -F "/" {'print $1'})
 
-test -f $CONFFILE && . $CONFFILE
-
 [ -z "$SERF_JOIN" ] &&  PEERS="" || PEERS="-join $SERF_JOIN"
-
 
 calculate_name() {
    PORT=${1:-""}
